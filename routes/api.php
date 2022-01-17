@@ -4,14 +4,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\API\CentroController;
-use App\Http\Controllers\API\NivelController;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Tqdev\PhpCrudApi\Api;
 use Tqdev\PhpCrudApi\Config;
 
 Route::apiResource('centros', CentroController::class);
-Route::apiResource('niveles', NivelController::class)->parameters(['niveles' =>'nivel']);
 
 Route::any('/{any}', function (ServerRequestInterface $request) {
     $config = new Config([
