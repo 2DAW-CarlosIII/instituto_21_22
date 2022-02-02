@@ -4,7 +4,7 @@ use App\Http\Controllers\API\CentroController;
 use App\Http\Controllers\API\NivelController;
 
 
-
+use App\Http\Controllers\API\Faltas_alumnoController;
 use App\Http\Controllers\API\falta_profesorController;
 
 
@@ -14,7 +14,6 @@ use App\Http\Controllers\API\TutorizadoController;
 
 use App\Http\Controllers\API\MateriaController;
 
-use App\Http\Controllers\API\MatriculaController;
 use App\Http\Controllers\API\PeriodoLectivoController;
 use App\Http\Controllers\API\MateriaMatriculadaController;
 
@@ -71,8 +70,6 @@ Route::apiResource('niveles', NivelController::class)
     'niveles' => 'nivel'
 ]);
 
-
-
 Route::apiResource('faltas_profesores', falta_profesorController::class)
 ->parameters([
     'faltas_profesores' => 'falta_profesor'
@@ -82,7 +79,10 @@ Route::apiResource('grupos', GrupoController::class);
 
 Route::apiResource('tutorizados', TutorizadoController::class);
 
-
+Route::apiResource('faltas_alumnos', Faltas_alumnoController::class)
+->parameters([
+    'faltas_alumnos' => 'falta_alumno'
+]);
 
 Route::apiResource('materias', MateriaController::class);
 
