@@ -13,11 +13,10 @@ use App\Http\Controllers\API\GrupoController;
 use App\Http\Controllers\API\TutorizadoController;
 
 use App\Http\Controllers\API\MateriaController;
-
 use App\Http\Controllers\API\MatriculaController;
 use App\Http\Controllers\API\PeriodoLectivoController;
 use App\Http\Controllers\API\MateriaMatriculadaController;
-
+use App\Http\Controllers\API\NotaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Psr\Http\Message\ServerRequestInterface;
@@ -66,6 +65,11 @@ Route::middleware('auth:sanctum')->
 
 Route::apiResource('matriculas', MatriculaController::class);
 
+Route::middleware('auth:sanctum')->apiResource('notas',NotaController::class);
+
+Route::middleware('auth:sanctum')->get('/notas/media/{media_id}', [NotaController::class, 'media']);
+
+
 Route::apiResource('niveles', NivelController::class)
 ->parameters([
     'niveles' => 'nivel'
@@ -97,6 +101,8 @@ Route::apiResource('materiasmatriculadas', MateriaMatriculadaController::class)
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::middleware('auth:sanctum')->get('/miCentro', [CentroController::class, 'miCentro']);
 
 Route::any('/{any}', function (ServerRequestInterface $request) {
     $config = new Config([

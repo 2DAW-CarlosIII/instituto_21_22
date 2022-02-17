@@ -13,4 +13,8 @@ class Matricula extends Model
         'alumno',
         'grupo',
     ];
+
+    public function materia(){
+        return $this->hashMany(nota::class, 'materia_id');
+    }
 }
