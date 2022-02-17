@@ -4,7 +4,6 @@ use App\Http\Controllers\API\CentroController;
 use App\Http\Controllers\API\NivelController;
 
 
-
 use App\Http\Controllers\API\falta_profesorController;
 
 
@@ -84,8 +83,11 @@ Route::middleware('auth:sanctum')->
 Route::apiResource('tutorizados', TutorizadoController::class);
 
 
-
 Route::apiResource('materias', MateriaController::class);
+
+Route::middleware('auth:sanctum')->
+    apiResource('notas', NotaController::class);
+
 
 Route::apiResource('periodosLectivos', PeriodoLectivoController::class);
 Route::apiResource('materiasmatriculadas', MateriaMatriculadaController::class)
