@@ -3,6 +3,9 @@
 use App\Http\Controllers\API\CentroController;
 use App\Http\Controllers\API\NivelController;
 
+use App\Http\Controllers\API\AnyoController;
+
+
 
 
 use App\Http\Controllers\API\falta_profesorController;
@@ -70,6 +73,11 @@ Route::apiResource('niveles', NivelController::class)
 ->parameters([
     'niveles' => 'nivel'
 ]);
+
+
+Route::apiResource('anyos_escolares', AnyoController::class)
+->parameters([
+    'anyos_escolares' => 'anyo_escolar'
 
 
 
