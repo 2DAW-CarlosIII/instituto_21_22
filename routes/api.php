@@ -17,7 +17,7 @@ use App\Http\Controllers\API\MateriaController;
 use App\Http\Controllers\API\MatriculaController;
 use App\Http\Controllers\API\PeriodoLectivoController;
 use App\Http\Controllers\API\MateriaMatriculadaController;
-
+use App\Http\Controllers\API\NotaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Psr\Http\Message\ServerRequestInterface;
@@ -64,7 +64,11 @@ Route::middleware('auth:sanctum')->
     apiResource('centros', CentroController::class)
 ;
 
-Route::apiResource('matriculas', MatriculaController::class);
+Route::apiResource('matriculas', MatriculaController::class)
+    ->middleware('auth:sanctum');
+
+Route::apiResource('notas', NotaController::class)
+    ->middleware('auth:sanctum');
 
 Route::apiResource('niveles', NivelController::class)
 ->parameters([
