@@ -1,0 +1,818 @@
+diff --git a/app/Http/Controllers/API/CentroController.php b/app/Http/Controllers/API/CentroController.php
+index e747d9d..0a3bf07 100644
+--- a/app/Http/Controllers/API/CentroController.php
++++ b/app/Http/Controllers/API/CentroController.php
+@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
+ use App\Models\Centro;
+ use Illuminate\Http\Request;
+ use App\Http\Resources\CentroResource;
+-use Illuminate\Support\Facades\Auth;
+ use Illuminate\Support\Facades\Http;
+ use Illuminate\Support\Facades\Gate;
+ 
+@@ -39,11 +38,6 @@ class CentroController extends Controller
+         return response()->json(json_decode($response));
+     }
+ 
+-    public function miCentro() {
+-        $user = Auth::user();
+-        return new CentroResource($user ->centroCoordinado);
+-    }
+-
+     /**
+      * Store a newly created resource in storage.
+      *
+diff --git a/app/Http/Controllers/API/NotaController.php b/app/Http/Controllers/API/NotaController.php
+deleted file mode 100644
+index f1d61e0..0000000
+--- a/app/Http/Controllers/API/NotaController.php
++++ /dev/null
+@@ -1,88 +0,0 @@
+-<?php
+-
+-namespace App\Http\Controllers\API;
+-
+-use App\Http\Controllers\Controller;
+-use App\Http\Resources\NotaResource;
+-use App\Models\nota;
+-use Illuminate\Http\Request;
+-use Illuminate\Support\Facades\DB;
+-
+-class NotaController extends Controller
+-{
+-    /**
+-     * Display a listing of the resource.
+-     *
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function __construct()
+-    {
+-        $this->authorizeResource(Nota::class, 'nota');
+-    }
+-
+-    public function index()
+-    {
+-        return NotaResource::collection(Nota::paginate(20));
+-    }
+-
+-    /**
+-     * Store a newly created resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function store(Request $request)
+-    {
+-        $nota = json_decode($request->getContent(), true);
+-
+-        $nota = Nota::create($nota);
+-
+-        return new NotaResource($nota);
+-    }
+-
+-    /**
+-     * Display the specified resource.
+-     *
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function show(nota $nota)
+-    {
+-        return new NotaResource($nota);
+-    }
+-
+-    /**
+-     * Update the specified resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function update(Request $request, nota $nota)
+-    {
+-        $notaData = json_decode($request->getContent(), true);
+-        $nota->update($notaData);
+-
+-        return new NotaResource($nota);
+-    }
+-
+-    /**
+-     * Remove the specified resource from storage.
+-     *
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Http\Response
+-     */
+-    public function destroy(nota $nota)
+-    {
+-        $nota->delete();
+-    }
+-    public function media(Request $request,$materia_id){
+-        $total = 0;
+-        $notas = DB::table('notas')->where('user_id', $request->user()->id)->where('materia_id',$materia_id)->get('notas');
+-        $cantidad = DB::table('notas')->where('user_id', $request->user()->id)->where('materia_id',$materia_id)->count();
+-        foreach ($notas as $key => $value) {
+-            $total= $value->notas+$total;
+-        }
+-        return "Nota media del alumne " .$request->user()->name.": ".$total/$cantidad;
+-    }
+-}
+diff --git a/app/Http/Resources/NotaResource.php b/app/Http/Resources/NotaResource.php
+deleted file mode 100644
+index 584efe1..0000000
+--- a/app/Http/Resources/NotaResource.php
++++ /dev/null
+@@ -1,24 +0,0 @@
+-<?php
+-
+-namespace App\Http\Resources;
+-
+-use Illuminate\Http\Resources\Json\JsonResource;
+-
+-class NotaResource extends JsonResource
+-{
+-    /**
+-     * Transform the resource into an array.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+-     */
+-    public function toArray($request)
+-    {
+-        return [
+-            "materia_id" => new MateriaResource($this->materia),
+-            "user_id" => new UserResource($this->user),
+-            "evaluacion" => $this->evaluacion,
+-            "notas" => $this->notas
+-        ];
+-    }
+-}
+diff --git a/app/Models/Materia.php b/app/Models/Materia.php
+index f60909c..137829f 100644
+--- a/app/Models/Materia.php
++++ b/app/Models/Materia.php
+@@ -12,7 +12,4 @@ class Materia extends Model
+     protected $fillable = [
+         'nombre'
+     ];
+-    public function notas(){
+-        return $this->hashMany(nota::class,  'materia_id');
+-    }
+ }
+diff --git a/app/Models/Matricula.php b/app/Models/Matricula.php
+index cfed745..61d0328 100644
+--- a/app/Models/Matricula.php
++++ b/app/Models/Matricula.php
+@@ -13,8 +13,4 @@ class Matricula extends Model
+         'alumno',
+         'grupo',
+     ];
+-
+-    public function materia(){
+-        return $this->hashMany(nota::class, 'materia_id');
+-    }
+ }
+diff --git a/app/Models/User.php b/app/Models/User.php
+index fc3d317..28bd201 100644
+--- a/app/Models/User.php
++++ b/app/Models/User.php
+@@ -62,8 +62,4 @@ class User extends Authenticatable
+     public function grupos() {
+         return $this->belongsToMany(Grupo::class, 'matriculas', 'alumno', 'grupo');
+     }
+-
+-    public function notas(){
+-        return $this->hashMany(nota::class, 'user_id');
+-    }
+ }
+diff --git a/app/Models/nota.php b/app/Models/nota.php
+deleted file mode 100644
+index 10459a0..0000000
+--- a/app/Models/nota.php
++++ /dev/null
+@@ -1,19 +0,0 @@
+-<?php
+-
+-namespace App\Models;
+-
+-use Illuminate\Database\Eloquent\Factories\HasFactory;
+-use Illuminate\Database\Eloquent\Model;
+-
+-class nota extends Model
+-{
+-    //protected $primaryKey = 'user_id';
+-    use HasFactory;
+-
+-    public function user(){
+-        return $this->belongsTo(User::class,  'user_id');
+-    }
+-    public function materia(){
+-        return $this->belongsTo(Materia::class,  'materia_id');
+-    }
+-}
+diff --git a/app/Policies/NotaPolicy.php b/app/Policies/NotaPolicy.php
+deleted file mode 100644
+index 14fd3d6..0000000
+--- a/app/Policies/NotaPolicy.php
++++ /dev/null
+@@ -1,106 +0,0 @@
+-<?php
+-
+-namespace App\Policies;
+-
+-use App\Models\User;
+-use App\Models\nota;
+-use Illuminate\Auth\Access\HandlesAuthorization;
+-
+-class NotaPolicy
+-{
+-    use HandlesAuthorization;
+-
+-    /**
+-     * Determine whether the user can view any models.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function viewAny(User $user)
+-    {
+-        return true;
+-    }
+-
+-    /**
+-     * Determine whether the user can view the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function view(User $user, nota $nota)
+-    {
+-        return true;
+-    }
+-
+-    /**
+-     * Determine whether the user can create models.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function create(User $user)
+-    {
+-        if ($user->profesor) {
+-            return true;
+-        }else{
+-            return false;
+-        }
+-    }
+-
+-    /**
+-     * Determine whether the user can update the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function update(User $user, nota $nota)
+-    {
+-        if ($user->profesor) {
+-            return true;
+-        }else{
+-            return false;
+-        }
+-    }
+-
+-    /**
+-     * Determine whether the user can delete the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function delete(User $user, nota $nota)
+-    {
+-        if ($user->profesor) {
+-            return true;
+-        }else{
+-            return false;
+-        }
+-    }
+-
+-    /**
+-     * Determine whether the user can restore the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function restore(User $user, nota $nota)
+-    {
+-        //
+-    }
+-
+-    /**
+-     * Determine whether the user can permanently delete the model.
+-     *
+-     * @param  \App\Models\User  $user
+-     * @param  \App\Models\nota  $nota
+-     * @return \Illuminate\Auth\Access\Response|bool
+-     */
+-    public function forceDelete(User $user, nota $nota)
+-    {
+-        //
+-    }
+-}
+diff --git a/app/Providers/AuthServiceProvider.php b/app/Providers/AuthServiceProvider.php
+index 6573063..515f6bf 100644
+--- a/app/Providers/AuthServiceProvider.php
++++ b/app/Providers/AuthServiceProvider.php
+@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Gate;
+ use App\Policies\CentroPolicy;
+ use App\Models\Centro;
+ use App\Models\User;
+-use App\Models\nota;
+-use App\Policies\NotaPolicy;
+ 
+ class AuthServiceProvider extends ServiceProvider
+ {
+@@ -20,7 +18,6 @@ class AuthServiceProvider extends ServiceProvider
+     protected $policies = [
+         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+         Centro::class => CentroPolicy::class,
+-        Nota::class => NotaPolicy::class,
+     ];
+ 
+     /**
+diff --git a/database/factories/CentroFactory.php b/database/factories/CentroFactory.php
+deleted file mode 100644
+index ae18c5d..0000000
+--- a/database/factories/CentroFactory.php
++++ /dev/null
+@@ -1,23 +0,0 @@
+-<?php
+-
+-namespace Database\Factories;
+-
+-use Illuminate\Database\Eloquent\Factories\Factory;
+-
+-class CentroFactory extends Factory
+-{
+-    /**
+-     * Define the model's default state.
+-     *
+-     * @return array
+-     */
+-    public function definition()
+-    {
+-        return [
+-            'codigo' => $this->faker->numberBetween(30000000, 30099999),
+-            'nombre' => 'I.E.S ' . $this->faker->company(),
+-            'verificado' => 1,
+-            'web' => 'https://'.$this->faker->domainName()
+-        ];
+-    }
+-}
+diff --git a/database/factories/GrupoFactory.php b/database/factories/GrupoFactory.php
+deleted file mode 100644
+index dc1387c..0000000
+--- a/database/factories/GrupoFactory.php
++++ /dev/null
+@@ -1,25 +0,0 @@
+-<?php
+-
+-namespace Database\Factories;
+-
+-use Illuminate\Database\Eloquent\Factories\Factory;
+-
+-class GrupoFactory extends Factory
+-{
+-    /**
+-     * Define the model's default state.
+-     *
+-     * @return array
+-     */
+-    public function definition()
+-    {
+-        return [
+-            'curso' => $this->faker->numberBetween(1,6),
+-            'letra' => $this->faker->randomLetter(),
+-            'nombre' => $this->faker->word(),
+-            'anyoescolar' => $this->faker->numberBetween(1,3),
+-            'nivel' => $this->faker->numberBetween(1,5),
+-            'creador' => $this->faker->numberBetween(1,10)
+-        ];
+-    }
+-}
+diff --git a/database/factories/notaFactory.php b/database/factories/notaFactory.php
+deleted file mode 100644
+index 0b7dbaf..0000000
+--- a/database/factories/notaFactory.php
++++ /dev/null
+@@ -1,23 +0,0 @@
+-<?php
+-
+-namespace Database\Factories;
+-
+-use Illuminate\Database\Eloquent\Factories\Factory;
+-
+-class notaFactory extends Factory
+-{
+-    /**
+-     * Define the model's default state.
+-     *
+-     * @return array
+-     */
+-    public function definition()
+-    {
+-        return [
+-            'user_id' => $this->faker->numberBetween(1,10),
+-            'materia_id' => $this->faker->numberBetween(1,10),
+-            'evaluacion' => $this->faker->numberBetween(1,3),
+-            'notas' => $this->faker->numberBetween(0,10)
+-        ];
+-    }
+-}
+diff --git a/database/migrations/2022_02_16_071756_notas.php b/database/migrations/2022_02_16_071756_notas.php
+deleted file mode 100644
+index c05f5c0..0000000
+--- a/database/migrations/2022_02_16_071756_notas.php
++++ /dev/null
+@@ -1,35 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-class Notas extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     *
+-     * @return void
+-     */
+-    public function up()
+-    {
+-        Schema::create('notas', function (Blueprint $table) {
+-            $table->id();
+-            $table->bigInteger('user_id');
+-            $table->bigInteger('materia_id');
+-            $table->integer('evaluacion');
+-            $table->integer('notas');
+-            $table->timestamps();
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     *
+-     * @return void
+-     */
+-    public function down()
+-    {
+-        Schema::dropIfExists('notas');
+-    }
+-}
+diff --git a/database/migrations/2022_02_16_084142_add_profesor_to_users.php b/database/migrations/2022_02_16_084142_add_profesor_to_users.php
+deleted file mode 100644
+index c086661..0000000
+--- a/database/migrations/2022_02_16_084142_add_profesor_to_users.php
++++ /dev/null
+@@ -1,32 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-class AddProfesorToUsers extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     *
+-     * @return void
+-     */
+-    public function up()
+-    {
+-        Schema::table('users', function (Blueprint $table) {
+-            $table->boolean('profesor')->default(false);
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     *
+-     * @return void
+-     */
+-    public function down()
+-    {
+-        Schema::table('users', function (Blueprint $table) {
+-            //
+-        });
+-    }
+-}
+diff --git a/database/migrations/2022_02_17_204838_tabla_notas.php b/database/migrations/2022_02_17_204838_tabla_notas.php
+deleted file mode 100644
+index 780b37f..0000000
+--- a/database/migrations/2022_02_17_204838_tabla_notas.php
++++ /dev/null
+@@ -1,35 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-class TablaNotas extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     *
+-     * @return void
+-     */
+-    public function up()
+-    {
+-        Schema::create('notas', function (Blueprint $table) {
+-            $table->id();
+-            $table->bigInteger('user_id');
+-            $table->bigInteger('materia_id');
+-            $table->integer('evaluacion');
+-            $table->integer('notas');
+-            $table->timestamps();
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     *
+-     * @return void
+-     */
+-    public function down()
+-    {
+-        Schema::dropIfExists('notas');
+-    }
+-}
+diff --git a/database/migrations/2022_02_17_212757_add_alumnos_to_user_table.php b/database/migrations/2022_02_17_212757_add_alumnos_to_user_table.php
+deleted file mode 100644
+index 87d8731..0000000
+--- a/database/migrations/2022_02_17_212757_add_alumnos_to_user_table.php
++++ /dev/null
+@@ -1,32 +0,0 @@
+-<?php
+-
+-use Illuminate\Database\Migrations\Migration;
+-use Illuminate\Database\Schema\Blueprint;
+-use Illuminate\Support\Facades\Schema;
+-
+-class AddAlumnosToUserTable extends Migration
+-{
+-    /**
+-     * Run the migrations.
+-     *
+-     * @return void
+-     */
+-    public function up()
+-    {
+-        Schema::table('users', function (Blueprint $table) {
+-            $table->boolean('alumnos')->nullable();
+-        });
+-    }
+-
+-    /**
+-     * Reverse the migrations.
+-     *
+-     * @return void
+-     */
+-    public function down()
+-    {
+-        Schema::table('users', function (Blueprint $table) {
+-            $table->dropColumn('alumnos');
+-        });
+-    }
+-}
+diff --git a/database/seeders/DatabaseSeeder.php b/database/seeders/DatabaseSeeder.php
+index 43215d4..6f2ee28 100644
+--- a/database/seeders/DatabaseSeeder.php
++++ b/database/seeders/DatabaseSeeder.php
+@@ -2,7 +2,6 @@
+ 
+ namespace Database\Seeders;
+ 
+-use App\Models\User;
+ use Illuminate\Database\Seeder;
+ 
+ class DatabaseSeeder extends Seeder
+@@ -14,43 +13,6 @@ class DatabaseSeeder extends Seeder
+      */
+     public function run()
+     {
+-        self::seedUsers();
+-        //\App\Models\User::factory(10)->create();
++        \App\Models\User::factory(10)->create();
+     }
+-
+-    private static function seedUsers()
+-    {
+-
+-        foreach (self::$arrayUsuarios as $usuarios) {
+-            $usuarios['password']=bcrypt($usuarios['password']);
+-            User::create(
+-                $usuarios
+-            );
+-        }
+-
+-
+-    }
+-    private static $arrayUsuarios = array(
+-        array(
+-            'name' => "Jose Luis Muñoz",
+-            'email' => "1837071@alu.murciaeduca.es",
+-            'password' => 'password',
+-            'profesor' => false,
+-            'alumnos' => true
+-        ),
+-        array(
+-            'name' => "Alberto Sierra",
+-            'email' => "alberto.sierra@alu.murciaeduca.es",
+-            'password' => 'password',
+-            'profesor' => true,
+-            'alumnos' => false
+-        ),
+-        array(
+-            'name' => "Javier Murcia",
+-            'email' => "javiermurcia@alu.murciaeduca.es",
+-            'password' => 'password',
+-            'profesor' => false,
+-            'alumnos' => true
+-        )
+-    );
+ }
+diff --git a/database/seeders/NotasSeeder.php b/database/seeders/NotasSeeder.php
+deleted file mode 100644
+index 8277bde..0000000
+--- a/database/seeders/NotasSeeder.php
++++ /dev/null
+@@ -1,18 +0,0 @@
+-<?php
+-
+-namespace Database\Seeders;
+-
+-use Illuminate\Database\Seeder;
+-
+-class NotasSeeder extends Seeder
+-{
+-    /**
+-     * Run the database seeds.
+-     *
+-     * @return void
+-     */
+-    public function run()
+-    {
+-        \App\Models\Nota::factory(48)->create();
+-    }
+-}
+diff --git a/routes/api.php b/routes/api.php
+index 2d6be1e..bfb9984 100644
+--- a/routes/api.php
++++ b/routes/api.php
+@@ -13,10 +13,11 @@ use App\Http\Controllers\API\GrupoController;
+ use App\Http\Controllers\API\TutorizadoController;
+ 
+ use App\Http\Controllers\API\MateriaController;
++
+ use App\Http\Controllers\API\MatriculaController;
+ use App\Http\Controllers\API\PeriodoLectivoController;
+ use App\Http\Controllers\API\MateriaMatriculadaController;
+-use App\Http\Controllers\API\NotaController;
++
+ use Illuminate\Http\Request;
+ use Illuminate\Support\Facades\Route;
+ use Psr\Http\Message\ServerRequestInterface;
+@@ -65,11 +66,6 @@ Route::middleware('auth:sanctum')->
+ 
+ Route::apiResource('matriculas', MatriculaController::class);
+ 
+-Route::middleware('auth:sanctum')->apiResource('notas',NotaController::class);
+-
+-Route::middleware('auth:sanctum')->get('/notas/media/{media_id}', [NotaController::class, 'media']);
+-
+-
+ Route::apiResource('niveles', NivelController::class)
+ ->parameters([
+     'niveles' => 'nivel'
+@@ -102,8 +98,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+     return $request->user();
+ });
+ 
+-Route::middleware('auth:sanctum')->get('/miCentro', [CentroController::class, 'miCentro']);
+-
+ Route::any('/{any}', function (ServerRequestInterface $request) {
+     $config = new Config([
+         'address' => env('DB_HOST', '127.0.0.1'),
+diff --git a/tests/Feature/CentroCoordinadoTest.php b/tests/Feature/CentroCoordinadoTest.php
+deleted file mode 100644
+index e91ca9a..0000000
+--- a/tests/Feature/CentroCoordinadoTest.php
++++ /dev/null
+@@ -1,36 +0,0 @@
+-<?php
+-
+-namespace Tests\Feature;
+-
+-use Illuminate\Foundation\Testing\RefreshDatabase;
+-use Illuminate\Foundation\Testing\WithFaker;
+-use Tests\TestCase;
+-use App\Models\User;
+-use App\Models\Centro;
+-use Laravel\Sanctum\Sanctum;
+-
+-
+-class CentroCoordinadoTest extends TestCase
+-{
+-    /**
+-     * A basic feature test example.
+-     *
+-     * @return void
+-     */
+-    public function test_example()
+-    {
+-
+-        Sanctum::actingAs(User::factory()
+-        ->hasAttached(
+-            Centro::factory(),
+-            'centroCoordinado'
+-        )
+-        ->create());
+-
+-        $response = $this->get('/api/miCentro');
+-
+-        $response->assertStatus(200)
+-        ->assertJsonStructure(['data' => ['codigo', 'nombre', 'web']])
+-        ->assertJsonCount(1, 'data');
+-    }
+-}
+diff --git a/tests/Feature/GruposUsuarioTest.php b/tests/Feature/GruposUsuarioTest.php
+index c1f05a3..9a8a4b4 100644
+--- a/tests/Feature/GruposUsuarioTest.php
++++ b/tests/Feature/GruposUsuarioTest.php
+@@ -5,9 +5,6 @@ namespace Tests\Feature;
+ use Illuminate\Foundation\Testing\RefreshDatabase;
+ use Illuminate\Foundation\Testing\WithFaker;
+ use Tests\TestCase;
+-use App\Models\User;
+-use App\Models\Grupo;
+-use Laravel\Sanctum\Sanctum;
+ 
+ class GruposUsuarioTest extends TestCase
+ {
+@@ -18,16 +15,8 @@ class GruposUsuarioTest extends TestCase
+      */
+     public function test_example()
+     {
+-        Sanctum::actingAs(User::factory()
+-        ->hasAttached(
+-            Grupo::factory()->count(3)
+-        )
+-        ->create());
+-
+         $response = $this->get('/api/grupos');
+ 
+-        $response->assertStatus(200)
+-        ->assertJsonStructure(['data' => [['curso', 'letra', 'nivel']]])
+-        ->assertJsonCount(3, 'data');
++        $response->assertStatus(200);
+     }
+ }
+diff --git a/tests/Feature/NotasTest.php b/tests/Feature/NotasTest.php
+deleted file mode 100644
+index 6f2588b..0000000
+--- a/tests/Feature/NotasTest.php
++++ /dev/null
+@@ -1,28 +0,0 @@
+-<?php
+-
+-namespace Tests\Feature;
+-
+-use App\Models\nota;
+-use Illuminate\Foundation\Testing\RefreshDatabase;
+-use Illuminate\Foundation\Testing\WithFaker;
+-use Laravel\Sanctum\Sanctum;
+-use Tests\TestCase;
+-
+-class NotasTest extends TestCase
+-{
+-    /**
+-     * A basic feature test example.
+-     *
+-     * @return void
+-     */
+-    public function test_example()
+-    {
+-        Sanctum::actingAs(
+-            nota::factory(48)->create()
+-        );
+-
+-        $response = $this->get('/');
+-
+-        $response->assertStatus(200);
+-    }
+-}
