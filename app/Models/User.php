@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'usuario_av',
     ];
 
     /**
@@ -57,6 +58,10 @@ class User extends Authenticatable
 
     public function centroCoordinado() {
         return $this->hasOne(Centro::class, 'coordinador');
+    }
+
+    public function cursos() {
+        return $this->belongsToMany(Curso::class);
     }
 
     public function grupos() {

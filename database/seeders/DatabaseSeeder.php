@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Curso;
+use App\Models\Grupo;
+use App\Models\Matricula;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -14,8 +17,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        self::seedUsers();
-        //\App\Models\User::factory(10)->create();
+        User::create([
+            'name' => 'José Luis Muñoz',
+            'email' => '9772453@gmail.com',
+            'password' => bcrypt('password'),
+            'usuario_av' => 185484,
+        ]);
     }
 
     private static function seedUsers()

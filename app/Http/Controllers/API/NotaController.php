@@ -76,6 +76,7 @@ class NotaController extends Controller
     {
         $nota->delete();
     }
+
     public function media(Request $request,$materia_id){
         $total = 0;
         $notas = DB::table('notas')->where('user_id', $request->user()->id)->where('materia_id',$materia_id)->get('notas');
