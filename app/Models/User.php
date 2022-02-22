@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'usuario_av',
     ];
 
     /**
@@ -59,7 +60,15 @@ class User extends Authenticatable
         return $this->hasOne(Centro::class, 'coordinador');
     }
 
+    public function cursos() {
+        return $this->belongsToMany(Curso::class);
+    }
+
     public function grupos() {
         return $this->belongsToMany(Grupo::class, 'matriculas', 'alumno', 'grupo');
+    }
+
+    public function notas(){
+        return $this->hashMany(nota::class, 'user_id');
     }
 }
