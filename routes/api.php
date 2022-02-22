@@ -17,6 +17,7 @@ use App\Http\Controllers\API\MateriaController;
 use App\Http\Controllers\API\MatriculaController;
 use App\Http\Controllers\API\PeriodoLectivoController;
 use App\Http\Controllers\API\MateriaMatriculadaController;
+use App\Http\Controllers\API\CursoController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -82,6 +83,8 @@ Route::middleware('auth:sanctum')->
     apiResource('grupos', GrupoController::class);
 
 Route::apiResource('tutorizados', TutorizadoController::class);
+
+Route::apiResource('cursos', CursoController::class);
 
 
 
