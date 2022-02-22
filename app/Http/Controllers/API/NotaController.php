@@ -3,20 +3,26 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Matricula;
+use App\Http\Resources\NotaResource;
+use App\Models\Nota;
 use Illuminate\Http\Request;
-use App\Http\Resources\MatriculaResource;
 
-class MatriculaController extends Controller
+class NotaController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $this->authorizeResource(Nota::class, 'nota');
+    }
+
     public function index()
     {
-        return MatriculaResource::collection(Matricula::paginate());
+        return NotaResource::collection(Nota::paginate(20));
     }
 
     /**
@@ -27,47 +33,47 @@ class MatriculaController extends Controller
      */
     public function store(Request $request)
     {
-        $matricula = json_decode($request->getContent(), true);
+        $nota = json_decode($request->getContent(), true);
 
-        $matricula = Matricula::create($matricula);
+        $nota = Nota::create($nota);
 
-        return new MatriculaResource($matricula);
+        return new NotaResource($nota);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Matricula  $matricula
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Http\Response
      */
-    public function show(Matricula $matricula)
+    public function show(Nota $nota)
     {
-        return new MatriculaResource($matricula);
+        return new NotaResource($nota);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Matricula  $matricula
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Matricula $matricula)
+    public function update(Request $request, Nota $nota)
     {
-        $matriculaData = json_decode($request->getContent(), true);
-        $matricula->update($matriculaData);
+        $notaData = json_decode($request->getContent(), true);
+        $nota->update($notaData);
 
-        return new MatriculaResource($matricula);
+        return new NotaResource($nota);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Matricula  $matricula
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Matricula $matricula)
+    public function destroy(Nota $nota)
     {
-        $matricula->delete();
+        $nota->delete();
     }
 }

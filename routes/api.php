@@ -17,7 +17,7 @@ use App\Http\Controllers\API\MateriaController;
 use App\Http\Controllers\API\MatriculaController;
 use App\Http\Controllers\API\PeriodoLectivoController;
 use App\Http\Controllers\API\MateriaMatriculadaController;
-
+use App\Http\Controllers\API\NotaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Psr\Http\Message\ServerRequestInterface;
@@ -64,6 +64,8 @@ Route::middleware('auth:sanctum')->
     apiResource('centros', CentroController::class)
 ;
 
+Route::middleware('auth:sanctum')->apiResource('notas', NotaController::class);
+
 Route::apiResource('matriculas', MatriculaController::class);
 
 Route::apiResource('niveles', NivelController::class)
@@ -71,7 +73,7 @@ Route::apiResource('niveles', NivelController::class)
     'niveles' => 'nivel'
 ]);
 
-
+Route::middleware('auth:sanctum')->apiResource('cursos', CursoController::class);
 
 Route::apiResource('faltas_profesores', falta_profesorController::class)
 ->parameters([
@@ -82,8 +84,6 @@ Route::middleware('auth:sanctum')->
     apiResource('grupos', GrupoController::class);
 
 Route::apiResource('tutorizados', TutorizadoController::class);
-
-
 
 Route::apiResource('materias', MateriaController::class);
 
@@ -110,4 +110,3 @@ Route::any('/{any}', function (ServerRequestInterface $request) {
     $response = $api->handle($request);
     return $response;
 })->where('any', '.*');
-

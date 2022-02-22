@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Materia;
+use App\Http\Resources\CursoResource;
+use App\Models\Curso;
 use Illuminate\Http\Request;
-use App\Http\Resources\MateriaResource;
 
-class MateriaController extends Controller
+class CursoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +16,7 @@ class MateriaController extends Controller
      */
     public function index()
     {
-        return MateriaResource::collection(Materia::paginate(20));
+        return CursoResource::collection(Curso::paginate());
     }
 
     /**
@@ -27,47 +27,48 @@ class MateriaController extends Controller
      */
     public function store(Request $request)
     {
-        $materia = json_decode($request->getContent(), true);
+        $curso = json_decode($request->getContent(), true);
 
-        $materia = Materia::create($materia);
+        $curso = Curso::create($curso);
 
-        return new MateriaResource($materia);
+        return new CursoResource($curso);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Materia  $materia
+     * @param  \App\Models\Curso  $curso
      * @return \Illuminate\Http\Response
      */
-    public function show(Materia $materia)
+    public function show(Curso $curso)
     {
-        return new MateriaResource($materia);
+        $this->authorize('view', $curso);
+        return new CursoResource($curso);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Materia  $materia
+     * @param  \App\Models\Curso  $curso
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Materia $materia)
+    public function update(Request $request, Curso $curso)
     {
-        $materiaData = json_decode($request->getContent(), true);
-        $materia->update($materiaData);
+        $cursoData = json_decode($request->getContent(), true);
+        $curso->update($cursoData);
 
-        return new MateriaResource($materia);
+        return new CursoResource($curso);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Materia  $materia
+     * @param  \App\Models\Curso  $curso
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Materia $materia)
+    public function destroy(Curso $curso)
     {
-        $materia->delete();
+        $curso->delete();
     }
 }
