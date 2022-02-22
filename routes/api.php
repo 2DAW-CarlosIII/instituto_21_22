@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\CentroController;
+use App\Http\Controllers\API\CursoController;
 use App\Http\Controllers\API\NivelController;
 
 
@@ -26,6 +27,8 @@ use Tqdev\PhpCrudApi\Config;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -93,6 +96,10 @@ Route::apiResource('materiasmatriculadas', MateriaMatriculadaController::class)
     'materiasmatriculadas' => 'materiaMatriculada'
 
 ]);
+
+Route::middleware('auth:sanctum')->apiResource('cursos', CursoController::class);
+
+Route::middleware('auth:sanctum')->get('/cursos/{cursoid}', [CursoController::class]);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

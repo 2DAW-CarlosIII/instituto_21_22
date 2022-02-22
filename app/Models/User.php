@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Curso;
 
 class User extends Authenticatable
 {
@@ -21,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'usuario_av',
     ];
 
     /**
@@ -57,6 +59,10 @@ class User extends Authenticatable
 
     public function centroCoordinado() {
         return $this->hasOne(Centro::class, 'coordinador');
+    }
+
+    public function cursos() {
+        return $this->belongsToMany(Curso::class, 'curso_id');
     }
 
     public function grupos() {
