@@ -6,7 +6,10 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use App\Policies\CentroPolicy;
 use App\Models\Centro;
+use App\Models\Nota;
 use App\Models\User;
+use App\Policies\CursoPolicy;
+use App\Policies\NotaPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -18,6 +21,8 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
         Centro::class => CentroPolicy::class,
+        Nota::class => NotaPolicy::class,
+        Curso::class => CursoPolicy::class
     ];
 
     /**
