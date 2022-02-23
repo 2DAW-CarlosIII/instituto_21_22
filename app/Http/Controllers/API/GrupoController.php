@@ -17,9 +17,8 @@ class GrupoController extends Controller
      */
     public function index()
     {
-        $usuarioAutenticado = Auth::user();
-        $gruposUsuarioAutenticado = $usuarioAutenticado->grupos;
-        return GrupoResource::collection($gruposUsuarioAutenticado);
+        $gruposDelUsuarioAutenticado = Auth::user()->grupos;
+        return GrupoResource::collection($gruposDelUsuarioAutenticado);
     }
 
     /**
