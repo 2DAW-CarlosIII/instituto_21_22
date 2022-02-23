@@ -9,7 +9,6 @@ use App\Models\User;
 class Centro extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'codigo',
         'nombre',
